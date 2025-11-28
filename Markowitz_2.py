@@ -70,8 +70,32 @@ class MyPortfolio:
         """
         TODO: Complete Task 4 Below
         """
-        
-        
+        MOMENTUM_DAYS = 10
+        xlk_index = assets.get_loc("XLK")
+        xlu_index = assets.get_loc("XLU")
+        xlp_index = assets.get_loc("XLP")
+        n = len(assets)
+
+        for i in range(MOMENTUM_DAYS, len(self.price.index)):
+            date = self.price.index[i]
+
+            # 最近 MOMENTUM_DAYS 天的報酬（不包含今天）
+            window_returns = self.returns[assets].iloc[i - MOMENTUM_DAYS : i]
+            cum_ret = (1 + window_returns).prod() - 1 
+            
+            # 找出這段時間表現最差的資產
+            worst_asset = cum_ret.idxmin()
+            weights = np.zeros(n)
+            if worst_asset == "XLK":
+                # XLK 是這段期間最爛
+                weights[assets.get_loc("XLU")] = 0.45
+                weights[assets.get_loc("XLP")] = 0.45
+                weights[xlk_index] = 0.10
+            else:
+                # 否則 All in XLK
+                weights[xlk_index] = 1.0
+
+            self.portfolio_weights.loc[date, assets] = weights
         """
         TODO: Complete Task 4 Above
         """
